@@ -20,6 +20,8 @@ npm start
 :film: [Walkthrough video that demonstrates tha application's functionality](https://placebear.com/g/200/500)
 
 
+
+https://patorjk.com/software/taag/
 ---------------------
 
 UofO12mySQLemployeeTracker

@@ -2,7 +2,7 @@ const inquirer = require("inquirer");
 const mysql = require("mysql");
 const cTable = require('console.table');
 require('dotenv').config();
-const util = require('util');
+
 
 const connection = mysql.createConnection(    
     {
@@ -12,8 +12,6 @@ const connection = mysql.createConnection(
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
   });
-
-const queryAsync = util.promisify(connection.query)
 
 const start = () => {
     inquirer.prompt({
@@ -90,7 +88,7 @@ const start = () => {
         });
 };
 
-//ADD A DEPARTMENT
+//ADD A DEPARTMENT - Required
 //COMPLETE - WORKS
 const addDept = () => {
     inquirer.prompt({
@@ -111,13 +109,12 @@ const addDept = () => {
                 })
         })
 }
-//ADD A ROLE
+//ADD A ROLE - Required
 //COMPLETE - WORKS
 const addRole = () => {
     connection.query('SELECT * FROM department', (err, res) => {
         if (err) throw err;
-    inquirer
-    .prompt([
+    inquirer.prompt([
         {
             name: 'title',
             type: 'input',
@@ -137,16 +134,15 @@ const addRole = () => {
         {
           name: 'name',
           type: 'rawlist',
-          department() {
+          choices() {
             const departments = [];
             res.forEach(({ name }) => {
               departments.push(name);
             });
             return departments;
           },
-          message: 'Select the department for the role.',        
-        
-}
+          message: 'Select the department for the role.',
+        },
 ])
     .then((answer) => {
         let department_id;
@@ -170,111 +166,73 @@ const addRole = () => {
     })
 }
 
-/*===========================
-**************IN PROGRESS****************
-TODO: Look into promisify using notes below from office hours , this includes lines 16 and 5 
-//ADD AN EMPLOYEE
-
-
+//ADD AN EMPLOYEE - Required
+//COMPLETE - WORKS
 const addEmp = () => {
-
-    let roles = connection.query('SELECT title, salary FROM role');
-    let managers = queryAsync(`SELECT CONCAT(first_name, " ", last_name) AS employee, role.title, department.name AS department 
-    FROM employee 
-    LEFT JOIN role ON employee.role_id = role.id 
-    LEFT JOIN department ON department.id = role.department_id`);
-
-    inquirer
-        .prompt([
-            {
-                name: 'first_name',
-                type: 'input',
-                message: 'Enter the first name.',
-            },
-            {
-                name: 'last_name',
-                type: 'input',
-                message: 'Enter the last name.',
-            },
-
-            //USER CHOOSES THE ROLE FROM LIST
-            ///.then call function that will add on more questions
-            {
-                name: 'role_id',
-                type: 'rawlist',
-                roles(roles) {
-
-                    roles = [];
-                    res.forEach(({ role }) => {
-                        roles.push(role);
-                    });
-                    return roles;
-
-                },
-                message: 'Select the role for the employee.',
-
-            },
-            ////THEN HAVE USER SELECT THE MANAGER FROM LIST
-            {
-                name: 'manager_id',
-                type: 'rawlist',
-                managers.then(managers) {
-
-                    managers = [];
-                    res.forEach(({ manager }) => {
-                        managers.push(manager);
-                    });
-                    return managers;
-
-                },
-                message: 'Select the manager for the employee.',
-
-            }
-        ])
-        .then((answers) => {
-            let role_id;
-            res.forEach((role) => {
-                if (roles.role === answers.role) {
-                    role_id = role;
-                }
+    connection.query('SELECT * FROM role', (err, res) => {
+        if (err) throw err;
+    inquirer.prompt([
+        {
+            name: 'first_name',
+                        type: 'input',
+                        message: 'Enter the first name.',
+    },
+    {
+        name: 'last_name',
+        type: 'input',
+        message: 'Enter the last name.',
+},
+        {
+          name: 'title',
+          type: 'rawlist',
+          choices() {
+            const roles = [];
+            res.forEach(({ title }) => {
+              roles.push(title);
             });
-
-            let manager_id;
-            res.forEach((manager) => {
-                if (managers.manager === answers.manager) {
-                    manager_id = manager;
-                }
-            });
-
-            connection.query('INSERT INTO role SET ?',
-                {
-                    first_name: answers.first_name,
-                    last_name: answers.last_name,
-                    role_id: answers.role_id,
-                    manager_id: answers.manager_id,
-                },
-                (err, res) => {
-                    if (err) throw err;
-                    start();
-                })
+            return roles;
+          },
+          message: 'Select the employee\'s title.',
+        },
+])
+    .then((answer) => {
+        let role_id;
+        res.forEach((role_id) => {
+            if (roles.role === answer.role) {
+               role_id = role;
+              }
         })
+        connection.query('INSERT INTO employee SET ?',        
+        {
+            first_name: answer.first_name,
+            last_name: answer.last_name,
+           role_id: role_id.role_id,
+        //    manager_id: manager_id.manager_id,
+        },
+       (err,res) => {
+           if (err) throw err;
+           
+           start();
+        })
+    })
+    })
 }
-============================*/
-//VIEW DEPARTMENT
+
+//VIEW DEPARTMENT - Required
 //COMPLETE - WORKS
 const viewDept = () => {    
-        connection.query('SELECT name FROM department AS department', (err, res) => {
+        connection.query('SELECT name AS departmentFROM department', (err, res) => {
             if (err) throw err;
             console.table(res);
             start();
         })
 }
 
-//VIEW ROLE
+//VIEW ROLE - Required
 //COMPLETE - WORKS
 const viewRole = () => {
 connection.query(
-    `SELECT role.title, role.salary, department.name 
+    `SELECT role.title, role.salary, department.name AS department
         FROM department 
         INNER JOIN role ON department.id = role.department_id`,
  (err, res) => {
@@ -286,8 +244,8 @@ connection.query(
 
 /*===========================
 REWORK ME****************
-TODO: Shoule be more like the view employee
-//VIEW EMPLOYEES LIST
+TODO: 
+//VIEW EMPLOYEES LIST - Required
 ============================*/
 const viewEmp = () => {
 connection.query(
@@ -310,8 +268,8 @@ connection.query(
 
 /*===========================
 REWORK ME****************
-TODO: Shoule be more like the view employee
-//VIEW EMPLOYEES BY MANAGER
+TODO: Should be more like the view employee
+//VIEW EMPLOYEES BY MANAGER - Bonus
 ============================*/
 const viewMgr = () => {
     connection.query(
@@ -330,7 +288,7 @@ const viewMgr = () => {
 
 /*===========================
 ******************COMPLETE ME
-//UPDATE ROLE
+//UPDATE ROLE - Required
 const updateRole = () => {
     
 }
@@ -338,7 +296,7 @@ const updateRole = () => {
 
 /*===========================
 ******************COMPLETE ME
-//UPDATE MANAGER ID
+//UPDATE MANAGER ID - Bonus
 
 const updateMgr = () => {
 
@@ -347,19 +305,19 @@ const updateMgr = () => {
 
 /*===========================
 ******************COMPLETE ME
-//DELETE A DEPARTMENT
+//DELETE A DEPARTMENT - bonus
 const deleteDept = () => {
 }
 
 /*===========================
 ******************COMPLETE ME
-//DELETE ROLE
+//DELETE ROLE - bonus
 const deleteRole = () => {
 }
 
 /*===========================
 ******************COMPLETE ME
-//DELETE EMPLOYEE
+//DELETE EMPLOYEE - bonus
 
 
 const deleteEmp = () => {
@@ -368,7 +326,7 @@ const deleteEmp = () => {
 
 /*===========================
 ******************COMPLETE ME
-//VIEW THE BUDGET
+//VIEW THE BUDGET - bonus
 TO DO: calculate all the salaries
 
 const viewBudget = () => {
