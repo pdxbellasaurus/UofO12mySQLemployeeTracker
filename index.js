@@ -28,10 +28,10 @@ const start = () => {
             'Update employee roles',
             'Update employee manager',
             'View employees by manager',
-            'Delete department',
-            'Delete roles',
-            'Delete employee',
-            'View department personnel budget',
+            // 'Delete department',
+            // 'Delete roles',
+            // 'Delete employee',
+            // 'View department personnel budget',
             'EXIT'
         ],
 
@@ -65,18 +65,18 @@ const start = () => {
                 case 'View employees by manager':
                     viewMgr();
                     break;
-                case 'Delete department':
-                    deleteDept();
-                    break;
-                case 'Delete roles':
-                    deleteRole();
-                    break;
-                case 'Delete employee':
-                    deleteEmp();
-                    break;
-                case 'View department personnel budget':
-                    viewBudget();
-                    break;
+                // case 'Delete department':
+                //     deleteDept();
+                //     break;
+                // case 'Delete roles':
+                //     deleteRole();
+                //     break;
+                // case 'Delete employee':
+                //     deleteEmp();
+                //     break;
+                // case 'View department personnel budget':
+                //     viewBudget();
+                //     break;
                 case 'EXIT':
                     console.log('Goodbye')
                     connection.end();
@@ -89,7 +89,6 @@ const start = () => {
 };
 
 //ADD A DEPARTMENT - Required
-//COMPLETE - WORKS
 const addDept = () => {
     inquirer.prompt({
         name: 'name',
@@ -110,7 +109,6 @@ const addDept = () => {
         })
 }
 //ADD A ROLE - Required
-//COMPLETE - WORKS
 const addRole = () => {
     connection.query('SELECT * FROM department', (err, res) => {
         if (err) throw err;
@@ -157,7 +155,7 @@ const addRole = () => {
             salary: answer.salary,
             department_id: department_id.department_id,
         },
-       (err,res) => {
+       (err) => {
            if (err) throw err;
            
            start();
@@ -167,61 +165,60 @@ const addRole = () => {
 }
 
 //ADD AN EMPLOYEE - Required
-//COMPLETE - WORKS
 const addEmp = () => {
-    connection.query('SELECT * FROM role', (err, res) => {
-        if (err) throw err;
-    inquirer.prompt([
-        {
-            name: 'first_name',
-                        type: 'input',
-                        message: 'Enter the first name.',
-    },
-    {
-        name: 'last_name',
-        type: 'input',
-        message: 'Enter the last name.',
-},
-        {
-          name: 'title',
-          type: 'rawlist',
-          choices() {
-            const roles = [];
-            res.forEach(({ title }) => {
-              roles.push(title);
-            });
-            return roles;
-          },
-          message: 'Select the employee\'s title.',
-        },
-])
-    .then((answer) => {
-        let role_id;
-        res.forEach((role_id) => {
-            if (roles.role === answer.role) {
-               role_id = role;
-              }
-        })
-        connection.query('INSERT INTO employee SET ?',        
-        {
-            first_name: answer.first_name,
-            last_name: answer.last_name,
-           role_id: role_id.role_id,
-        //    manager_id: manager_id.manager_id,
-        },
-       (err,res) => {
-           if (err) throw err;
-           
-           start();
-        })
-    })
-    })
+    connection.query(
+        `SELECT role.id, role.title 
+            FROM role`,
+        (err, res) => {
+            if (err) throw err;
+            const roles = res.map(({ id, title }) => ({
+                value: id,
+                title: `${title}`,
+            }));
+            console.table(res);
+            inquirer.prompt([
+                {
+                    name: 'first_name',
+                    type: 'input',
+                    message: 'Enter the first name.',
+                },
+                {
+                    name: 'last_name',
+                    type: 'input',
+                    message: 'Enter the last name.',
+                },
+                {
+                    name: 'role',
+                    type: 'list',
+                    message: 'Select the employee\'s title.',
+                    choices: roles,
+                },
+            ])
+                .then((answer) => {
+                    console.log(answer);
+
+                    connection.query('INSERT INTO employee SET ?',
+                        {
+                            first_name: answer.first_name,
+                            last_name: answer.last_name,
+                            role_id: answer.role,
+                            // manager_id: answer.manager,
+                        },
+                        (err) => {
+                            if (err) throw err;
+                            console.table(res);
+                            start();
+                        });
+                });
+        });
 }
 
 //VIEW DEPARTMENT - Required
-//COMPLETE - WORKS
-const viewDept = () => {    
-        connection.query('SELECT name AS departmentFROM department', (err, res) => {
+const viewDept = () => {
+    connection.query(
+        `SELECT name AS department 
+            FROM department`,
+        (err, res) => {
             if (err) throw err;
             console.table(res);
             start();
@@ -229,7 +226,6 @@ const viewDept = () => {
 }
 
 //VIEW ROLE - Required
-//COMPLETE - WORKS
 const viewRole = () => {
 connection.query(
     `SELECT role.title, role.salary, department.name AS department
@@ -242,20 +238,14 @@ connection.query(
 })
 }
 
-/*===========================
-REWORK ME****************
-TODO: 
 //VIEW EMPLOYEES LIST - Required
-============================*/
 const viewEmp = () => {
 connection.query(
-    `SELECT employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, 
+    `SELECT employee.first_name, employee.last_name, role.title, role.salary, 
         CONCAT(mgr.first_name, ' ', mgr.last_name) AS manager
         FROM employee
         LEFT JOIN role
         ON employee.role_id = role.id
-        LEFT JOIN department
-        ON department.id = role.department_id
         LEFT JOIN employee mgr
         ON employee.manager_id = mgr.id
         ORDER BY department.name`,
@@ -266,69 +256,50 @@ connection.query(
 })
 }
 
-/*===========================
-REWORK ME****************
-TODO: Should be more like the view employee
 //VIEW EMPLOYEES BY MANAGER - Bonus
-============================*/
 const viewMgr = () => {
     connection.query(
-        ` SELECT CONCAT(first_name, ' ', last_name) AS employee, role.title, department.name AS department
-         FROM employee WHERE manager_id is NULL
+        ` SELECT  
+        CONCAT(mgr.first_name, ' ', mgr.last_name) AS manager,
+        CONCAT(employee.first_name, ' ', employee.last_name) AS employee, role.title
+         FROM employee 
+         LEFT JOIN employee mgr
+        ON employee.manager_id = mgr.id
          LEFT JOIN role
          ON employee.role_id = role.id
-         LEFT JOIN department
-           ON department.id = role.department_id`,
-           (err, res) => {
-             if (err) throw err;
-             console.table(res);
-             start();
-         })
-         }
+                    ORDER BY mgr.id`,
+        (err, res) => {
+            if (err) throw err;
+            console.table(res);
+            start();
+        })
+}
 
-/*===========================
-******************COMPLETE ME
+
 //UPDATE ROLE - Required
 const updateRole = () => {
     
 }
-============================*/
+
 
 /*===========================
-******************COMPLETE ME
 //UPDATE MANAGER ID - Bonus
-
 const updateMgr = () => {
-
 }
-============================*/
 
-/*===========================
-******************COMPLETE ME
 //DELETE A DEPARTMENT - bonus
 const deleteDept = () => {
 }
 
-/*===========================
-******************COMPLETE ME
 //DELETE ROLE - bonus
 const deleteRole = () => {
 }
 
-/*===========================
-******************COMPLETE ME
 //DELETE EMPLOYEE - bonus
-
-
 const deleteEmp = () => {
 }
-============================*/
 
-/*===========================
-******************COMPLETE ME
 //VIEW THE BUDGET - bonus
-TO DO: calculate all the salaries
-
 const viewBudget = () => {
 }
 ============================*/
