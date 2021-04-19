@@ -311,7 +311,6 @@ connection.query(
             ON department.id = role.department_id`,
  (err, res) => {
     if (err) throw err;
-    console.log('');
     console.table(res);
     start();
 })
@@ -347,7 +346,6 @@ const viewMgr = () => {
             ORDER BY mgr.id`,
         (err, res) => {
             if (err) throw err;
-            console.log('');
             console.table(res);
             start();
         })
@@ -414,7 +412,6 @@ const updateRole = () => {
                                     ],
                                     (err) => {
                                         if (err) throw err;
-                                        console.log('');
                                         viewEmp();
                                         start();
                                     }
