@@ -102,7 +102,7 @@ const addDept = () => {
                 {
                     name: answer.name,
                 },
-                (err) => {
+                err => {
                     if (err) throw err;
                     start();
                 })
@@ -159,7 +159,7 @@ let department_id;
                                     salary: answer.salary,
                                     department_id: department_id,
                                 },
-                                (err) => {
+                                err => {
                                     if (err) throw err;
                                     console.log('');
                                     viewRole();
@@ -275,7 +275,7 @@ const addEmp = () => {
                                                                     role_id: role_id,
                                                                     manager_id: manager_id,
                                                                 },
-                                                                (err) => {
+                                                                err => {
                                                                     if (err) throw err;
                                                                     viewEmp();
                                                                     start();
@@ -296,7 +296,6 @@ const viewDept = () => {
             FROM department`,
         (err, res) => {
             if (err) throw err;
-            console.log('');
             console.table(res);
             start();
         })
@@ -313,7 +312,7 @@ connection.query(
     if (err) throw err;
     console.table(res);
     start();
-})
+});
 }
 
 //VIEW EMPLOYEES LIST - Required
@@ -410,7 +409,7 @@ const updateRole = () => {
                                             id: employee_id,
                                         },
                                     ],
-                                    (err) => {
+                                    err => {
                                         if (err) throw err;
                                         viewEmp();
                                         start();
@@ -485,7 +484,7 @@ const updateMgr = () => {
                                                 id: employee_id,
                                             },
                                         ],
-                                        (err) => {
+                                        err => {
                                             if (err) throw err;
                                             console.log('');
                                             viewEmp();
@@ -514,7 +513,8 @@ const deleteEmp = () => {
 const viewBudget = () => {
 }
 ============================*/
-connection.connect(err =>{
-    if(err) throw (err);
+
+connection.connect((err) => {
+    if (err) throw err;
     start();
-})
+  });
