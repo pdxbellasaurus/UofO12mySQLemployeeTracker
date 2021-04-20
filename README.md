@@ -12,7 +12,8 @@ npm start
 
 ## Application Appearance
 
-:camera: [!Screensnip of the application's appearance](https://placebear.com/g/200/300)
+ ##### :camera: Screensnip of the application's appearance
+![Screensnip of the application's appearance](https://user-images.githubusercontent.com/74746211/115365327-22175000-a179-11eb-9655-105e3a11dd59.png)
 
 ## Application Functionality
 
@@ -28,10 +29,11 @@ The command-line application allows a user to:
 
   * View employees by manager
 
+##### :movie_camera: [Walkthrough video that demonstrates the application's functionality](https://user-images.githubusercontent.com/74746211/115368106-9fdc5b00-a17b-11eb-9e4d-1dbdf3db5e50.mp4)
 
-##### Walkthrough video that demonstrates the application's functionality:
+## Issues
 
-:film: [Walkthrough video that demonstrates tha application's functionality](https://placebear.com/g/200/500)
+:bug: Issues with Inquirer nested calls on Windows is a known issue. Issue opened and documented [here](https://github.com/pdxbellasaurus/UofO12mySQLemployeeTracker/issues/1). 
 
 ## Resources
 
@@ -43,8 +45,6 @@ The command-line application allows a user to:
 
 ---------------------
 
-UofO12mySQLemployeeTracker
-
-Week 12 Homework  - mySQL Employee Tracker
+Week 12 Homework  - UofO12mySQLemployeeTracker
 
 © 2021 PDXbellasaurus :sauropod:
